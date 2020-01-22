@@ -1,15 +1,15 @@
 # Doesn't front-end have any data structure?
 
-* 翻译： Anki Yang
-* Date:   22 Jan 2020
+* 翻译：  Anki Yang
+* Date:  22 Jan 2020
 
 When you watch carefully outside from the front-end world, and you don’t want to be deceived by this “monotonous” code world, but also you’re afraid of seeing it wrong or missing any beauty of it.
 Lets start with a PR of React from version 16.10.0.
-> Improve queue performance by switching its internal data structure to a min binary heap. ( [@acdlite](https://github.com/acdlite) in [#16245](http://link.zhihu.com/?target=https%3A//github.com/facebook/react/pull/16245) )  
+> Improve queue performance by switching its internal data structure to a min binary heap. ( [@acdlite](https://github.com/acdlite) in [#16245](https://github.com/facebook/react/pull/16245) )  
 
-So in order to understand what this PR had optimised.  Lets review some knowledges.
+So in order to understand what this PR had optimised.  Lets review some knowledge.
 
-1. One of the hard problem of front-end optimisation is solving browser freezing(浏览器卡顿). Basically because of Javascript is single-threaded in our browser  and Js thread could modify DOM and then make pages change. But  in order to ensure our page would display safely, when Js is modifying DOM, our browser will let Js thread and UI rendering thread **mutex**(互斥). In other words, every time we run our JS code, UI rendering thread would suspend and all UI update would be saved in queue until Js thread is idle and then to render pages.
+1. One of the hard problem of front-end optimisation is solving browser freezing(浏览器卡顿). Basically because Javascript is single-threaded in our browser  and Js thread could modify DOM and then make pages change. But  in order to ensure our page would display safely, when Js is modifying DOM, our browser will let Js thread and UI rendering thread **mutex**(互斥). In other words, every time we run our JS code, UI rendering thread would suspend and all UI update would be saved in queue until Js thread is idle and then to render pages.
 
 But this design has posed an inevitable problem: long-time JS execution would cause UI threads in browser suspending for a long time and it couldn’t render any more and response to users’ events. In result, we feel the stuck.
 
@@ -22,7 +22,7 @@ To address this problem, React v16 used new *[Fiber](https://github.com/acdlite/
 Lets back to this PR😂.  To avoid long-time Javascript sequential execution, the new scheduling algorithm of React hold a Js execution queue.Every Js mission in the queue has different priority.It would be executed as much as possible as  different priorities during every browser rendering.In a limited execution time，not completed missions would be left to the next rendering interval, those already completed missions dequeue. In this way, those Js tasks that need to be performed for a long time are split into slicing tasks with different priorities, preventing the browser to let UI thread from being suspended and causing stuck. Those split tasks with different priorities would be executed “as the case may be “ at each rendering interval.
 
 So how to maintain and proceed this queue with priorities.
-Earlier, React 16 utilised linked list to record data, specifically a [double  circular   linked  list structure (双向循环链表结构)](https://www.geeksforgeeks.org/doubly-circular-linked-list-set-1-introduction-and-insertion/) to operate tasks in the **Scheduler**.
+Earlier, React 16 utilised linked list to record data, specifically a [double circular linked list structure (双向循环链表结构)](https://www.geeksforgeeks.org/doubly-circular-linked-list-set-1-introduction-and-insertion/) to operate tasks in the **Scheduler**.
 Each task match 5 different priorities.
 ```
 const ImmediatePriority = 1 
@@ -33,7 +33,7 @@ const IdlePriority = 5
 
 ```
 
-To prevent [Starvation problem](https://en.wikipedia.org/wiki/Starvation_(computer_science)), there are five expiration times for each task.
+To prevent [Starvation problem](https://en.wikipedia.org/wiki/Starvation_(computer_science), there are five expiration times for each task.
 ```
 // Times out immediately 
 const IMMEDIATE_PRIORITY_TIMEOUT = -1; 
@@ -47,6 +47,7 @@ const IDLE_PRIORITY = maxSigned31BitInt;
 
 
 **Using linked list to maintain our priority queue**: we add every task to the list, and use `performance.now() + timeout`  to record the expiration time of this task at the same time. **timeout** is related to the above 5 priorities. Of course, the higher priority, expiration time for timeout would be more short. Because, if it is expired, it need to be performed immediately. Thus, the higher priority for task, the easier for this task will be expired.
+
 [Relevant React source code](https://github.com/facebook/react/blob/901139c2910d0dc33f07f85c748c64371f8664f4/packages/scheduler/src/Scheduler.js#L279):
 ```
 function timeoutForPriorityLevel(priorityLevel) {
