@@ -2,3 +2,5 @@
 .idea/
 network/HTTPServer/node_modules
 LearnVue/todo/node_modules
+*package.json
+*package-lock.json
