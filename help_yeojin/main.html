@@ -1,0 +1,39 @@
+<!DOCTTYPE html>
+<html lang=en>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="main.js"></script>
+    <title>Test</title>
+</head>
+
+<body>
+    <label for="paragraph">Please input text:</label>
+    <input type="text" id="input_text" name="paragraph">
+    <p id="hidden_text">The form has been reset</p>
+    <button type="button" id="create" onclick="createClick()">Create</button>
+    <button type="button" id="reset_button" onclick="resetClick()">Reset</button>
+    <br>
+    <p id="show_text"></p>
+
+    <script type="text/javascript">
+        document.getElementById('reset_button').disabled = true;
+        document.getElementById('hidden_text').style.visibility = "hidden";
+
+        
+        function createClick() {
+            var input_text = document.getElementById("input_text").value;
+            document.getElementById('show_text').innerHTML=input_text;
+            document.getElementById('hidden_text').style.visibility = "hidden";
+            document.getElementById('reset_button').disabled = false;
+        } 
+
+        function resetClick() {
+            document.getElementById('hidden_text').style.visibility = "visible";
+        }
+        </script>
+</body>
+
+</html>
